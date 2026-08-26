@@ -35,9 +35,10 @@ jobs:
           import json
           from jsonschema import validate
           schema=json.load(open('schemas/pipeline-ir.v1.schema.json'))
-          fixture=json.load(open('examples/talking-head/pipeline-ir.json'))
-          validate(fixture,schema)
-          print('Pipeline IR schema PASS')
+          for path in ['examples/talking-head/pipeline-ir.json','examples/real-media/pipeline-ir.json']:
+              fixture=json.load(open(path))
+              validate(fixture,schema)
+              print(path, 'PASS')
           PY
-      - name: Run DAG/router/resume tests
-        run: python -m pytest -q tests/test_walking_skeleton.py
+      - name: Run orchestration contract tests
+        run: python -m pytest -q tests/test_walking_skeleton.py tests/test_transcript_storyboard.py

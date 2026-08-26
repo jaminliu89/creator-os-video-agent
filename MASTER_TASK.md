@@ -4,83 +4,62 @@
 Build a production-grade local-first pipeline any compatible host Agent can execute:
 `transcript/media → semantic direction → storyboard → Pipeline IR/DAG → provider routing → edit/motion/assets/audio → assembly → QA → final MP4`.
 
-## Current decision
-`creator-os-video-agent` is the orchestration Source of Truth above `ai-director-engine` and `motion-runtime-os`. No additional orchestrator repository.
+## Product decision — 2026-08-26
+The canonical MVP must NOT depend on paid ChatCut execution. ChatCut is now **OPTIONAL_PROVIDER / BENCHMARK**, not a release blocker. Our primary differentiation is a local-first Semantic Motion/MG Intelligence stack:
+`Director IR → MG Plan/Motion Grammar → Motion IR → HyperFrames | Motion Canvas | Remotion → Zhijian human takeover`.
 
 ## MT-001 — Contract & Architecture
 Status: **DONE FOR V1 CONTRACT**
-- [x] Agent-neutral orchestrator definition, PRD v2, research capture, Agent Compatibility Spec, Pipeline IR Spec/Schema.
-- [x] Provider and host-adapter registries.
-- [x] Talking-head and real-media Pipeline IR graphs.
+- [x] Agent-neutral orchestrator, PRD, Pipeline IR Schema, provider/host registries.
 
 ## MT-002 — Walking Skeleton
 Status: **DONE FOR REAL-MEDIA VERTICAL SLICE**
-- [x] Project-local source/transcript conventions.
-- [x] Transcript normalizer and storyboard compiler.
-- [x] Real `ai-director-engine` adapter.
-- [x] DAG runner with dependency validation, state persistence and resume.
-- [x] Capability router with preferred/fallback resolution.
-- [x] Runtime failure failover with persisted attempts and `provider_failovers` evidence.
-- [x] Real FFmpeg ingest/edit/media-QA/export adapter.
-- [x] Artifact/evidence manifest with checksums and lineage.
-- [x] `output/final.mp4` Video Agent-orchestrated real-media acceptance.
-
-Evidence:
-- Runtime failover contract run `32952946112`: SUCCESS.
-- Remotion Real Media Vertical Slice: SUCCESS, artifact `9600622752`.
-- HyperFrames Real Media run `32953105657`: SUCCESS, artifact `9600999497`.
+- [x] Real `ai-director-engine` adapter, DAG/resume/router/failover, FFmpeg, artifact/evidence lineage, final MP4.
+- [x] Remotion and HyperFrames real-media acceptance.
 
 ## MT-003 — Editable Edit Provider
-Status: **IN PROGRESS — AGENT-NEUTRAL EXTERNAL MCP BRIDGE DONE**
-- [x] Edit Provider Request/Result v1 machine schemas.
-- [x] `editable_output=true` capability gate prevents silent FFmpeg downgrade.
-- [x] ChatCut represented as editable external MCP provider, not an orchestrator.
-- [x] Agent-neutral ChatCut request/result file bridge.
-- [x] New durable state `waiting_external` for MCP/browser/human handoffs.
-- [x] Explicit `resume_external()` semantics; no busy-loop and no false provider failure.
-- [x] Request/result identity, editable artifact and verification checks.
-- [x] External handoff evidence persisted in `external_handoffs`.
-- [x] Any Host Agent can fulfill the same request through ChatCut MCP without changing Pipeline IR.
-- [ ] Execute against a live authenticated ChatCut MCP surface and capture a real editable project artifact.
-- [ ] Verify transcript cuts/captions/timeline modifications against a real source project.
-- [ ] Verify editable project reopen/round-trip and preview/export evidence.
-
-Evidence:
-- Walking Skeleton run `32956377710`: SUCCESS, including `tests/test_external_edit_bridge.py`.
+Status: **OPTIONAL INTEGRATION — CORE CONTRACT DONE**
+- [x] Edit Provider Request/Result v1 schemas.
+- [x] `editable_output=true` prevents silent FFmpeg downgrade.
+- [x] `waiting_external` + explicit resume + external handoff evidence.
+- [x] ChatCut request/result bridge remains available for users who have ChatCut.
+- [ ] Live ChatCut authenticated round-trip is optional evidence, not MVP blocker.
 
 ## MT-004 — Motion Router
 Status: **DONE FOR REMOTION + HYPERFRAMES REAL MEDIA**
-- [x] Remotion real-media provider.
-- [x] HyperFrames real provider adapter through `motion-runtime-os` provider contract.
-- [x] Runtime provider failure automatically tries fallback and records failover evidence.
-- [x] CLI supports explicit `--motion-provider` without changing canonical semantic intent.
-- [x] HyperFrames-first real-media Video Agent acceptance CI PASS.
-- [x] Final HyperFrames video+audio probe PASS and artifact uploaded.
+- [x] Real Remotion + HyperFrames providers, runtime failover, media QA and artifacts.
 
-## MT-005 — Generation Routers
-After live editable edit-provider acceptance: image, video/B-roll, TTS/voice, music, optional avatar contracts. Provider brands never enter canonical Pipeline IR semantics.
+## MT-005 — Motion / MG Intelligence — CURRENT PRIMARY BATTLE
+Goal: produce impressive knowledge/talking-head/brand MG locally without paid NLE dependency.
+- [x] `motion-runtime-os/docs/MG_INTELLIGENCE_SPEC.md` defines composable motion grammar and restraint policy.
+- [x] Provider-neutral `MG Plan v1` machine schema.
+- [x] Deterministic Semantic MG Planner baseline maps Director IR → grammar plan.
+- [x] Planner tests enforce revelation/contrast/question differentiation and exposition restraint.
+- [ ] MG Plan → Motion IR compiler.
+- [ ] Typography grammar execution: kinetic text, keyword isolation, number counter, mask reveal.
+- [ ] Diagram/data grammar execution: bar/line/comparison/process/callout.
+- [ ] Rhythm/spatial execution: freeze, negative space, push/pull, focus isolation, semantic transitions.
+- [ ] HyperFrames-first real 20–40s directed MG acceptance with source audio.
+- [ ] Subtitle-only neutral baseline vs Directed MG blind preference evaluation.
+- [ ] Motion Canvas provider discovery/contract/real render for diagram/vector specialist role.
+- [ ] Zhijian exposes MG Plan/grammar provenance and per-effect human override.
 
-## MT-006 — Host-Agent Neutrality
-Status: **PARTIAL — FILE HANDOFF CONTRACT NOW EXISTS**
-Same canonical fixture must execute under at least two Host Agents with equivalent Pipeline IR semantics. `waiting_external` + request/result files now make cross-Agent handoff deterministic; live two-host acceptance remains.
+## MT-006 — Generation Routers
+After MG Intelligence acceptance: optional image/video B-roll, TTS/voice, music/avatar providers. Local/no-cost paths preferred where quality permits.
 
-## MT-007 — Quality & Human Review
+## MT-007 — Host-Agent Neutrality
+Status: **PARTIAL**
+File contracts and external handoff semantics exist; two real Host Agents must still execute the same canonical fixture.
+
+## MT-008 — Quality & Human Review
 Status: **PARTIAL VIA ZHIJIAN**
-Transcript/timeline sync, media probe, director/motion semantic survival, provider downgrade report, approval gates and human preference evaluation. Zhijian now records append-only approve/reject/override events with provenance.
+Media/semantic QA plus append-only approve/reject/override evidence exists. Add MG-specific attention, restraint, temporal alignment, continuity and human preference gates.
 
-## Cross-product dependency — Zhijian M9
-`zhijian-ai` now has a real Video Agent product surface:
-- starts and observes Video Agent runs;
-- streams `final.mp4` for local preview;
-- imports Motion IR + Director IR + Evidence into its real Timeline Store;
-- preserves `artifactId / producerJob / provider / directorIntentRefs / motionLayerId` provenance;
-- exposes human approve/reject;
-- Clip timing edits generate provenance-aware override events before local state mutation.
-
-Latest Zhijian integration run `32956028759`: SUCCESS.
+## Zhijian M9
+Core human takeover is accepted: start/observe pipeline, local final preview, Timeline Store import, provenance, approve/reject and provenance-aware Clip override.
 
 ## MVP Definition of Done
-Video production plumbing is accepted across Remotion and HyperFrames, and Zhijian human takeover is wired. Full MVP still requires live ChatCut editable-project acceptance and at least two real Host Agents executing the same canonical handoff.
+MVP no longer requires ChatCut. It requires one real 20–40s source segment to run through Director → MG Planner → local motion providers → final MP4 → Zhijian takeover, with source audio preserved, semantic/restraint QA and a directed-vs-neutral human preference result. ChatCut remains an optional editable NLE adapter.
 
 ## Constraints
-Host Agent ≠ Director ≠ Orchestrator ≠ Provider. ChatCut/Remotion/HyperFrames are providers, not canonical state. No silent semantic downgrade, prompt-only architecture, unnecessary repository, secret-in-source workaround, or Blender/Unreal/full-NLE detour on the critical path.
+Host Agent ≠ Director ≠ Orchestrator ≠ Provider. Renderers do not decide narrative meaning. No template-ID architecture, silent semantic downgrade, paid-provider release dependency, prompt-only state, or decorative animation on every sentence.

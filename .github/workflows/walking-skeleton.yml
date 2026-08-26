@@ -1,0 +1,43 @@
+name: Video Agent Walking Skeleton
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'runtime/**'
+      - 'tests/**'
+      - 'examples/talking-head/**'
+      - 'schemas/**'
+      - 'registries/**'
+      - '.github/workflows/walking-skeleton.yml'
+  pull_request:
+    paths:
+      - 'runtime/**'
+      - 'tests/**'
+      - 'examples/talking-head/**'
+      - 'schemas/**'
+      - 'registries/**'
+      - '.github/workflows/walking-skeleton.yml'
+
+jobs:
+  walking-skeleton:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install pytest jsonschema
+      - name: Validate Pipeline IR fixture
+        run: |
+          python - <<'PY'
+          import json
+          from jsonschema import validate
+          schema=json.load(open('schemas/pipeline-ir.v1.schema.json'))
+          fixture=json.load(open('examples/talking-head/pipeline-ir.json'))
+          validate(fixture,schema)
+          print('Pipeline IR schema PASS')
+          PY
+      - name: Run DAG/router/resume tests
+        run: python -m pytest -q tests/test_walking_skeleton.py

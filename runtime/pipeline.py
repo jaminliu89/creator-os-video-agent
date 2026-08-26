@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
 
+from runtime.providers import ExternalActionRequired
 
 TERMINAL = {"succeeded", "failed", "skipped"}
 
@@ -19,7 +20,6 @@ def _json_hash(value: Any) -> str:
 @dataclass
 class ProjectPaths:
     root: Path
-
     @property
     def state_dir(self) -> Path: return self.root / "state"
     @property
@@ -32,7 +32,6 @@ class ProjectPaths:
     def run_state(self) -> Path: return self.state_dir / "run-state.json"
     @property
     def evidence_manifest(self) -> Path: return self.evidence_dir / "manifest.json"
-
     def ensure(self) -> None:
         for p in (self.state_dir, self.evidence_dir, self.artifacts_dir, self.output_dir): p.mkdir(parents=True, exist_ok=True)
 
@@ -41,7 +40,7 @@ class PipelineError(RuntimeError): pass
 
 
 class PipelineRunner:
-    """Deterministic orchestration kernel with durable state and provider fallback."""
+    """Deterministic orchestration kernel with durable state, provider fallback and external handoff."""
     def __init__(self, pipeline: Dict[str, Any], project_root: Path, router: Any):
         self.pipeline=pipeline; self.paths=ProjectPaths(Path(project_root)); self.paths.ensure(); self.router=router
         self.jobs={job["job_id"]:job for job in pipeline["jobs"]}; self._validate_dag(); self.state=self._load_or_initialize_state(); self.evidence=self._load_or_initialize_evidence()
@@ -76,7 +75,7 @@ class PipelineRunner:
 
     def _load_or_initialize_evidence(self)->Dict[str,Any]:
         if self.paths.evidence_manifest.exists():return json.loads(self.paths.evidence_manifest.read_text(encoding="utf-8"))
-        evidence={"version":"1.0","project_id":self.pipeline["project_id"],"events":[],"artifacts":[],"provider_failovers":[]};self._write_json(self.paths.evidence_manifest,evidence);return evidence
+        evidence={"version":"1.0","project_id":self.pipeline["project_id"],"events":[],"artifacts":[],"provider_failovers":[],"external_handoffs":[]};self._write_json(self.paths.evidence_manifest,evidence);return evidence
 
     @staticmethod
     def _write_json(path:Path,value:Any)->None:
@@ -89,9 +88,17 @@ class PipelineRunner:
         result=[]
         for job_id,job in self.jobs.items():
             status=self.state["jobs"][job_id]["status"]
-            if status in TERMINAL or status=="running":continue
+            if status in TERMINAL or status in {"running","waiting_external"}:continue
             if self._dependencies_succeeded(job):result.append(job)
         return result
+
+    def resume_external(self, job_id: str | None = None) -> int:
+        resumed = 0
+        for current_id, slot in self.state["jobs"].items():
+            if job_id and current_id != job_id: continue
+            if slot.get("status") == "waiting_external":
+                slot["status"] = "planned"; resumed += 1
+        self._persist(); return resumed
 
     def run(self)->Dict[str,Any]:
         while True:
@@ -117,6 +124,11 @@ class PipelineRunner:
             try:
                 result=provider.execute(job=job,project_root=self.paths.root);self._record_success(job,provider,attempt,result)
                 if failures:self.evidence["provider_failovers"].append({"job_id":job_id,"failed_providers":failures,"selected_provider":provider.provider_id})
+                self._persist();return
+            except ExternalActionRequired as exc:
+                attempt["finished_at"]=int(time.time());attempt["status"]="waiting_external";attempt["request_path"]=exc.request_path;attempt["result_path"]=exc.result_path
+                slot["status"]="waiting_external"
+                self.evidence["external_handoffs"].append({"job_id":job_id,"provider":provider.provider_id,"request_path":exc.request_path,"result_path":exc.result_path,"status":"waiting_external"})
                 self._persist();return
             except Exception as exc:
                 attempt["finished_at"]=int(time.time());attempt["status"]="failed";attempt["error"]=str(exc);failures.append({"provider":provider.provider_id,"error":str(exc)})

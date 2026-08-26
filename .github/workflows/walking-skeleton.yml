@@ -41,4 +41,4 @@ jobs:
               print(path, 'PASS')
           PY
       - name: Run orchestration and provider contract tests
-        run: python -m pytest -q tests/test_walking_skeleton.py tests/test_transcript_storyboard.py tests/test_edit_provider_contract.py
+        run: python -m pytest -q tests/test_walking_skeleton.py tests/test_transcript_storyboard.py tests/test_edit_provider_contract.py tests/test_external_edit_bridge.py

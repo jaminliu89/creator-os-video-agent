@@ -5,7 +5,7 @@ Build a production-grade local-first pipeline any compatible host Agent can exec
 `transcript/media → semantic direction → storyboard → Pipeline IR/DAG → provider routing → edit/motion/assets/audio → assembly → QA → final MP4`.
 
 ## Product decision — 2026-08-26
-The canonical MVP must NOT depend on paid ChatCut execution. ChatCut is now **OPTIONAL_PROVIDER / BENCHMARK**, not a release blocker. Our primary differentiation is a local-first Semantic Motion/MG Intelligence stack:
+The canonical MVP must NOT depend on paid ChatCut execution. ChatCut is **OPTIONAL_PROVIDER / BENCHMARK**. Primary differentiation is local-first Semantic Motion/MG Intelligence:
 `Director IR → MG Plan/Motion Grammar → Motion IR → HyperFrames | Motion Canvas | Remotion → Zhijian human takeover`.
 
 ## MT-001 — Contract & Architecture
@@ -31,35 +31,43 @@ Status: **DONE FOR REMOTION + HYPERFRAMES REAL MEDIA**
 
 ## MT-005 — Motion / MG Intelligence — CURRENT PRIMARY BATTLE
 Goal: produce impressive knowledge/talking-head/brand MG locally without paid NLE dependency.
-- [x] `motion-runtime-os/docs/MG_INTELLIGENCE_SPEC.md` defines composable motion grammar and restraint policy.
-- [x] Provider-neutral `MG Plan v1` machine schema.
-- [x] Deterministic Semantic MG Planner baseline maps Director IR → grammar plan.
-- [x] Planner tests enforce revelation/contrast/question differentiation and exposition restraint.
-- [ ] MG Plan → Motion IR compiler.
-- [ ] Typography grammar execution: kinetic text, keyword isolation, number counter, mask reveal.
-- [ ] Diagram/data grammar execution: bar/line/comparison/process/callout.
-- [ ] Rhythm/spatial execution: freeze, negative space, push/pull, focus isolation, semantic transitions.
-- [ ] HyperFrames-first real 20–40s directed MG acceptance with source audio.
-- [ ] Subtitle-only neutral baseline vs Directed MG blind preference evaluation.
+- [x] Composable Motion Grammar + restraint policy.
+- [x] Provider-neutral MG Plan v1 Schema.
+- [x] Semantic MG Planner: Director IR → differentiated grammar plan.
+- [x] MG Plan → Motion IR compiler.
+- [x] Typography execution baseline: hero text, keyword isolation, animated number counter.
+- [x] Diagram/data execution baseline: animated bar chart, before/after comparison, process/callout flow.
+- [x] Rhythm/spatial execution baseline: veil/negative-space behavior, impact light, camera push-in.
+- [x] MG QA: grammar-family diversity, effect density, exposition restraint, attention target and timing checks.
+- [x] Real 20s vertical source → Neutral baseline + Directed MG → local Remotion MP4 with preserved source audio.
+- [x] A/B artifacts packaged together for human preference review.
+- [ ] Blind preference evaluation: Directed must show measurable preference lift vs Neutral; collect qualitative failure tags.
+- [ ] HyperFrames executes the expanded MG grammar with semantic parity, not only established Motion IR subset.
 - [ ] Motion Canvas provider discovery/contract/real render for diagram/vector specialist role.
+- [ ] Expand grammar execution: line chart, timeline/node graph, document/UI, mask/morph transitions.
 - [ ] Zhijian exposes MG Plan/grammar provenance and per-effect human override.
 
+Evidence:
+- `motion-runtime-os` MG Intelligence run `32965740388`: SUCCESS — planner/compiler/schema/MG-QA/renderer-build PASS.
+- Directed MG A/B Real Media run `32965688798`: SUCCESS — pinned source, semantic compile, Neutral+Directed local renders, video/audio probes and artifact upload PASS.
+- A/B artifact `9605679296`, ~59.2 MB, digest `sha256:0acf5fd570e63828ac521ba1bce36236a13fae6d3e0b40da6f8d9fa95aef042b`.
+
 ## MT-006 — Generation Routers
-After MG Intelligence acceptance: optional image/video B-roll, TTS/voice, music/avatar providers. Local/no-cost paths preferred where quality permits.
+After MG quality acceptance: optional image/video B-roll, TTS/voice, music/avatar providers. Local/no-cost paths preferred where quality permits.
 
 ## MT-007 — Host-Agent Neutrality
 Status: **PARTIAL**
 File contracts and external handoff semantics exist; two real Host Agents must still execute the same canonical fixture.
 
 ## MT-008 — Quality & Human Review
-Status: **PARTIAL VIA ZHIJIAN**
-Media/semantic QA plus append-only approve/reject/override evidence exists. Add MG-specific attention, restraint, temporal alignment, continuity and human preference gates.
+Status: **IN PROGRESS**
+Media/semantic QA, MG restraint/density QA and append-only Zhijian approve/reject/override evidence exist. Human blind preference is now the primary unresolved quality gate.
 
 ## Zhijian M9
-Core human takeover is accepted: start/observe pipeline, local final preview, Timeline Store import, provenance, approve/reject and provenance-aware Clip override.
+Core human takeover is accepted: start/observe pipeline, local final preview, Timeline Store import, provenance, approve/reject and provenance-aware Clip override. Next: import MG Plan/grammar provenance and support per-effect edits.
 
 ## MVP Definition of Done
-MVP no longer requires ChatCut. It requires one real 20–40s source segment to run through Director → MG Planner → local motion providers → final MP4 → Zhijian takeover, with source audio preserved, semantic/restraint QA and a directed-vs-neutral human preference result. ChatCut remains an optional editable NLE adapter.
+The local pipeline no longer depends on ChatCut and already renders a real Directed MG A/B pair. MVP quality closure now requires Directed > Neutral human preference evidence, expanded MG parity across the chosen local providers, and Zhijian per-effect takeover. ChatCut remains an optional editable NLE adapter.
 
 ## Constraints
 Host Agent ≠ Director ≠ Orchestrator ≠ Provider. Renderers do not decide narrative meaning. No template-ID architecture, silent semantic downgrade, paid-provider release dependency, prompt-only state, or decorative animation on every sentence.

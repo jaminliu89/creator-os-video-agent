@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from runtime.pipeline import PipelineRunner
-from runtime.providers import fixture_router
+from runtime.providers import BaseProvider, CapabilityRouter, FixtureFFmpegProvider, FixtureDirectorProvider, fixture_router
 
 
 def load_pipeline():
@@ -39,3 +39,34 @@ def test_provider_routing_uses_fallback_when_preferred_missing(tmp_path):
     state = PipelineRunner(pipeline, tmp_path, fixture_router()).run()
     attempt = state["jobs"]["motion-001"]["attempts"][0]
     assert attempt["provider"] == "motion-runtime-remotion"
+
+
+class FailingMotionProvider(BaseProvider):
+    provider_id = "motion-runtime-remotion"
+    capabilities = {"motion_graphics", "kinetic_text", "video_layer", "audio_layer", "deterministic_render"}
+    def execute(self, job, project_root):
+        raise RuntimeError("simulated remotion failure")
+
+
+class FallbackMotionProvider(BaseProvider):
+    provider_id = "motion-runtime-hyperframes"
+    capabilities = {"motion_graphics", "kinetic_text", "video_layer", "audio_layer", "deterministic_render"}
+    def execute(self, job, project_root):
+        target = Path(project_root) / "artifacts" / "motion-render.mp4.fixture"
+        target.write_text("hyperframes fallback", encoding="utf-8")
+        return {"status":"ok","artifacts":[{"artifact_id":"artifact:motion-render","kind":"video","uri":"artifacts/motion-render.mp4.fixture","producer_job":job["job_id"],"provider":self.provider_id,"qa_status":"pass","metadata":{"fixture":True}}]}
+
+
+def test_runtime_failure_falls_back_and_records_evidence(tmp_path):
+    pipeline = load_pipeline()
+    motion = next(j for j in pipeline["jobs"] if j["job_id"] == "motion-001")
+    motion["preferred_provider"] = "motion-runtime-remotion"
+    motion["fallback_providers"] = ["motion-runtime-hyperframes"]
+    router = CapabilityRouter([FixtureFFmpegProvider(), FixtureDirectorProvider(), FailingMotionProvider(), FallbackMotionProvider()])
+    state = PipelineRunner(pipeline, tmp_path, router).run()
+    attempts = state["jobs"]["motion-001"]["attempts"]
+    assert [a["provider"] for a in attempts] == ["motion-runtime-remotion", "motion-runtime-hyperframes"]
+    assert attempts[0]["status"] == "failed"
+    assert attempts[1]["status"] == "succeeded"
+    manifest = json.loads((tmp_path / "evidence" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["provider_failovers"][0]["selected_provider"] == "motion-runtime-hyperframes"

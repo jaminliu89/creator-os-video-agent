@@ -65,7 +65,7 @@ class RealDirectorProvider(BaseProvider):
         root=Path(project_root); repo=Path(os.environ['AI_DIRECTOR_REPO']).resolve(); source=root/'artifacts/normalized-source.mp4'
         director=root/'state/director-ir.json'; motion=root/'state/motion-ir.json'; qa=root/'evidence/director-intent-qa.json'
         env=os.environ.copy(); env['PYTHONPATH']=str(repo)
-        subprocess.run(['python',str(repo/'prototype/analyze.py'),str(source),'-o',str(director),'--model','tiny','--source-asset-ref','real-media-interview.mp4','--motion-output',str(motion),'--qa-output',str(qa)],cwd=repo,env=env,check=True)
+        subprocess.run(['python',str(repo/'prototype/analyze.py'),str(source),'-o',str(director),'--model','tiny','--source-asset-ref','assets/real-media-interview.mp4','--motion-output',str(motion),'--qa-output',str(qa)],cwd=repo,env=env,check=True)
         return {'status':'ok','artifacts':[_artifact(root,'state:director-ir','director_ir',director,job['job_id'],self.provider_id,real=True),_artifact(root,'state:motion-ir','motion_ir',motion,job['job_id'],self.provider_id,real=True),_artifact(root,'evidence:director-qa','evidence',qa,job['job_id'],self.provider_id,real=True)],'real':True}
 
 
@@ -74,9 +74,17 @@ class RealMotionRuntimeProvider(BaseProvider):
     capabilities={"motion_graphics","kinetic_text","video_layer","audio_layer","deterministic_render"}
     def execute(self,job:Dict[str,Any],project_root:Path)->Dict[str,Any]:
         root=Path(project_root); repo=Path(os.environ['MOTION_RUNTIME_REPO']).resolve()
-        (repo/'public/assets').mkdir(parents=True,exist_ok=True); (repo/'examples/real-media-director').mkdir(parents=True,exist_ok=True); (repo/'out').mkdir(exist_ok=True)
-        shutil.copy2(root/'artifacts/rough-cut.mp4',repo/'public/assets/real-media-interview.mp4')
-        shutil.copy2(root/'state/motion-ir.json',repo/'examples/real-media-director/motion-ir.json')
+        public_asset=repo/'public/assets/real-media-interview.mp4'
+        motion_fixture=repo/'examples/real-media-director/motion-ir.json'
+        public_asset.parent.mkdir(parents=True,exist_ok=True); motion_fixture.parent.mkdir(parents=True,exist_ok=True); (repo/'out').mkdir(exist_ok=True)
+        rough_cut=root/'artifacts/rough-cut.mp4'
+        if not rough_cut.exists(): raise FileNotFoundError(f'missing rough cut before Motion Runtime staging: {rough_cut}')
+        shutil.copy2(rough_cut,public_asset)
+        shutil.copy2(root/'state/motion-ir.json',motion_fixture)
+        if not public_asset.exists() or public_asset.stat().st_size == 0: raise RuntimeError(f'failed to stage Motion Runtime public asset: {public_asset}')
+        motion_data=json.loads(motion_fixture.read_text(encoding='utf-8'))
+        video_refs=[layer.get('asset_ref') for scene in motion_data.get('scenes',[]) for layer in scene.get('layers',[]) if layer.get('type')=='video']
+        if 'assets/real-media-interview.mp4' not in video_refs: raise RuntimeError(f'Motion IR asset_ref does not match staged public asset: {video_refs}')
         _run(['node','scripts/validate-motion-ir.mjs','examples/real-media-director/motion-ir.json'],cwd=repo)
         _run(['npx','remotion','render','src/index.ts','RealMediaDirector','out/orchestrated-final.mp4'],cwd=repo)
         rendered=repo/'out/orchestrated-final.mp4'; target=root/'artifacts/motion-render.mp4'; target.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(rendered,target)

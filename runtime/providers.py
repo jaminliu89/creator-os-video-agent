@@ -9,6 +9,14 @@ class ProviderUnavailable(RuntimeError):
     pass
 
 
+class ExternalActionRequired(RuntimeError):
+    def __init__(self, provider_id: str, request_path: str, result_path: str, message: str = "external provider action required"):
+        super().__init__(message)
+        self.provider_id = provider_id
+        self.request_path = request_path
+        self.result_path = result_path
+
+
 class BaseProvider:
     provider_id = "base"
     capabilities: set[str] = set()

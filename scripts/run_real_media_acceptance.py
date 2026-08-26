@@ -14,32 +14,34 @@ def main() -> int:
     parser.add_argument("--project-root", default="work/real-media", help="Durable project working directory")
     parser.add_argument("--pipeline", default="examples/real-media/pipeline-ir.json", help="Pipeline IR JSON")
     parser.add_argument("--source", help="Optional source media to stage as input/source.mp4")
+    parser.add_argument("--motion-provider", choices=["motion-runtime-remotion", "motion-runtime-hyperframes"], help="Optional preferred motion provider for this run")
     args = parser.parse_args()
 
     root = Path(args.project_root).expanduser().resolve()
-    pipeline = Path(args.pipeline).expanduser().resolve()
+    pipeline_path = Path(args.pipeline).expanduser().resolve()
     if args.source:
         source = Path(args.source).expanduser().resolve()
-        if not source.exists():
-            raise SystemExit(f"source media not found: {source}")
-        staged = root / "input" / "source.mp4"
-        staged.parent.mkdir(parents=True, exist_ok=True)
-        if source != staged:
-            shutil.copy2(source, staged)
+        if not source.exists(): raise SystemExit(f"source media not found: {source}")
+        staged = root / "input" / "source.mp4"; staged.parent.mkdir(parents=True, exist_ok=True)
+        if source != staged: shutil.copy2(source, staged)
     staged = root / "input" / "source.mp4"
-    if not staged.exists():
-        raise SystemExit(f"missing staged source media: {staged}")
-    if not pipeline.exists():
-        raise SystemExit(f"pipeline IR not found: {pipeline}")
+    if not staged.exists(): raise SystemExit(f"missing staged source media: {staged}")
+    if not pipeline_path.exists(): raise SystemExit(f"pipeline IR not found: {pipeline_path}")
 
-    runner = PipelineRunner.from_file(pipeline, root, real_router())
+    pipeline = json.loads(pipeline_path.read_text(encoding="utf-8"))
+    if args.motion_provider:
+        motion = next((j for j in pipeline["jobs"] if j.get("kind") == "motion"), None)
+        if motion is None: raise SystemExit("pipeline has no motion job")
+        other = "motion-runtime-hyperframes" if args.motion_provider == "motion-runtime-remotion" else "motion-runtime-remotion"
+        motion["preferred_provider"] = args.motion_provider
+        motion["fallback_providers"] = [other]
+
+    runner = PipelineRunner(pipeline, root, real_router())
     state = runner.run()
     print(json.dumps(state, ensure_ascii=False, indent=2))
-    if state.get("status") != "succeeded":
-        raise SystemExit("pipeline did not succeed")
+    if state.get("status") != "succeeded": raise SystemExit("pipeline did not succeed")
     final = root / "output" / "final.mp4"
-    if not final.exists() or final.stat().st_size == 0:
-        raise SystemExit("missing final.mp4")
+    if not final.exists() or final.stat().st_size == 0: raise SystemExit("missing final.mp4")
     print(f"FINAL={final}")
     return 0
 

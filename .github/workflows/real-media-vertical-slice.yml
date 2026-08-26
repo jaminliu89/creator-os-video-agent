@@ -1,0 +1,82 @@
+name: Video Agent Real Media Vertical Slice
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'runtime/**'
+      - 'scripts/run_real_media_acceptance.py'
+      - 'examples/real-media/**'
+      - 'schemas/**'
+      - '.github/workflows/real-media-vertical-slice.yml'
+  workflow_dispatch:
+
+jobs:
+  real-media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: creator-os-video-agent
+      - uses: actions/checkout@v4
+        with:
+          repository: jaminliu89/ai-director-engine
+          path: ai-director-engine
+      - uses: actions/checkout@v4
+        with:
+          repository: jaminliu89/motion-runtime-os
+          path: motion-runtime-os
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install Python dependencies
+        run: python -m pip install -r ai-director-engine/requirements.txt jsonschema
+      - name: Install Motion Runtime dependencies
+        run: npm install
+        working-directory: motion-runtime-os
+      - name: Stage pinned public-domain source media
+        run: |
+          mkdir -p creator-os-video-agent/work/real-media/input
+          curl -L --fail --retry 3 'https://d34w7g4gy10iej.cloudfront.net/video/2603/DOD_111581929/DOD_111581929.mp4' -o creator-os-video-agent/work/real-media/input/source.mp4
+          echo 'a93869b5712154b990909a3bfb14e2636a5cce59174ecd64854abdbda302fad0  creator-os-video-agent/work/real-media/input/source.mp4' | sha256sum -c -
+      - name: Validate Pipeline IR
+        run: python - <<'PY'
+          import json
+          from jsonschema import Draft202012Validator
+          s=json.load(open('creator-os-video-agent/schemas/pipeline-ir.v1.schema.json'))
+          p=json.load(open('creator-os-video-agent/examples/real-media/pipeline-ir.json'))
+          Draft202012Validator(s).validate(p)
+          print('Pipeline IR schema PASS')
+          PY
+      - name: Execute orchestrated real-media pipeline
+        env:
+          PYTHONPATH: ${{ github.workspace }}/creator-os-video-agent
+          AI_DIRECTOR_REPO: ${{ github.workspace }}/ai-director-engine
+          MOTION_RUNTIME_REPO: ${{ github.workspace }}/motion-runtime-os
+        working-directory: creator-os-video-agent
+        run: python scripts/run_real_media_acceptance.py
+      - name: Verify final artifact and evidence
+        run: |
+          test -s creator-os-video-agent/work/real-media/output/final.mp4
+          test -s creator-os-video-agent/work/real-media/state/director-ir.json
+          test -s creator-os-video-agent/work/real-media/state/motion-ir.json
+          test -s creator-os-video-agent/work/real-media/evidence/manifest.json
+          test -s creator-os-video-agent/work/real-media/evidence/final-media-probe.json
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nw=1 creator-os-video-agent/work/real-media/output/final.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1 creator-os-video-agent/work/real-media/output/final.mp4
+          sha256sum creator-os-video-agent/work/real-media/output/final.mp4 > creator-os-video-agent/work/real-media/evidence/final.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: creator-os-video-agent-real-media-final
+          path: |
+            creator-os-video-agent/work/real-media/output/final.mp4
+            creator-os-video-agent/work/real-media/state/*.json
+            creator-os-video-agent/work/real-media/evidence/*.json
+            creator-os-video-agent/work/real-media/evidence/final.sha256
+          if-no-files-found: error

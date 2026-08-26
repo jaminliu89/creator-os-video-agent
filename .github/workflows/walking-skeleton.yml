@@ -40,5 +40,5 @@ jobs:
               validate(fixture,schema)
               print(path, 'PASS')
           PY
-      - name: Run orchestration contract tests
-        run: python -m pytest -q tests/test_walking_skeleton.py tests/test_transcript_storyboard.py
+      - name: Run orchestration and provider contract tests
+        run: python -m pytest -q tests/test_walking_skeleton.py tests/test_transcript_storyboard.py tests/test_edit_provider_contract.py

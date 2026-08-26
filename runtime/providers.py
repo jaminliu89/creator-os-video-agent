@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -23,12 +22,6 @@ class BaseProvider:
 
 
 class FixtureFFmpegProvider(BaseProvider):
-    """Deterministic plumbing adapter used by CI without external media binaries.
-
-    Real-media acceptance swaps this for the actual FFmpeg adapter. The shape and
-    artifact/evidence contract are identical.
-    """
-
     provider_id = "ffmpeg"
     capabilities = {"media_probe", "trim", "concat", "audio_mux", "subtitle_burn", "transcode", "assemble", "transcript_edit"}
 
@@ -90,20 +83,36 @@ class CapabilityRouter:
     def __init__(self, providers: List[BaseProvider]):
         self.providers = {p.provider_id: p for p in providers}
 
-    def resolve(self, job: Dict[str, Any]) -> BaseProvider:
-        candidates = []
+    def candidates(self, job: Dict[str, Any]) -> List[BaseProvider]:
+        ordered_ids: list[str] = []
         preferred = job.get("preferred_provider")
         if preferred:
-            candidates.append(preferred)
-        candidates.extend(job.get("fallback_providers") or [])
-        for provider_id in candidates:
+            ordered_ids.append(preferred)
+        ordered_ids.extend(job.get("fallback_providers") or [])
+
+        ordered: List[BaseProvider] = []
+        seen: set[str] = set()
+        for provider_id in ordered_ids:
+            if provider_id in seen:
+                continue
+            seen.add(provider_id)
             provider = self.providers.get(provider_id)
             if provider and provider.can_handle(job):
-                return provider
-        required = (job.get("requirements") or {}).get("capabilities", [])
+                ordered.append(provider)
+
         for provider in self.providers.values():
+            if provider.provider_id in seen:
+                continue
             if provider.can_handle(job):
-                return provider
+                ordered.append(provider)
+                seen.add(provider.provider_id)
+        return ordered
+
+    def resolve(self, job: Dict[str, Any]) -> BaseProvider:
+        candidates = self.candidates(job)
+        if candidates:
+            return candidates[0]
+        required = (job.get("requirements") or {}).get("capabilities", [])
         raise ProviderUnavailable(f"No provider satisfies {job['job_id']} capabilities={required}")
 
 

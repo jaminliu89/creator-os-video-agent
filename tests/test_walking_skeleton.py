@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
+import pytest
 
 from runtime.pipeline import PipelineRunner
-from runtime.providers import BaseProvider, CapabilityRouter, FixtureFFmpegProvider, FixtureDirectorProvider, fixture_router
+from runtime.providers import BaseProvider, CapabilityRouter, FixtureFFmpegProvider, FixtureDirectorProvider, ProviderUnavailable, fixture_router
 
 
 def load_pipeline():
@@ -70,3 +71,16 @@ def test_runtime_failure_falls_back_and_records_evidence(tmp_path):
     assert attempts[1]["status"] == "succeeded"
     manifest = json.loads((tmp_path / "evidence" / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["provider_failovers"][0]["selected_provider"] == "motion-runtime-hyperframes"
+
+
+def test_editable_edit_job_does_not_silently_downgrade_to_ffmpeg():
+    job = {
+        "job_id":"edit-editable",
+        "kind":"edit",
+        "requirements":{"capabilities":["transcript_edit"],"editable_output":True},
+        "preferred_provider":"chatcut",
+        "fallback_providers":["ffmpeg"],
+    }
+    router = CapabilityRouter([FixtureFFmpegProvider()])
+    with pytest.raises(ProviderUnavailable):
+        router.resolve(job)

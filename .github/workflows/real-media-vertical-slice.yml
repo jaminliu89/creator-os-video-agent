@@ -19,14 +19,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: creator-os-video-agent
-      - uses: actions/checkout@v4
-        with:
-          repository: jaminliu89/ai-director-engine
-          path: ai-director-engine
-      - uses: actions/checkout@v4
-        with:
-          repository: jaminliu89/motion-runtime-os
-          path: motion-runtime-os
+      - name: Clone public sibling engines
+        run: |
+          git clone --depth 1 https://github.com/jaminliu89/ai-director-engine.git ai-director-engine
+          git clone --depth 1 https://github.com/jaminliu89/motion-runtime-os.git motion-runtime-os
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

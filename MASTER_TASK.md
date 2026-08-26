@@ -20,19 +20,25 @@ Status: **DONE FOR V1 CONTRACT**
 - [x] `examples/talking-head/pipeline-ir.json` — first executable-shape walking-skeleton graph.
 
 ## MT-002 — Walking Skeleton
-Status: **IN PROGRESS — CURRENT CRITICAL PATH**
+Status: **IN PROGRESS — ORCHESTRATION KERNEL VERIFIED**
 One real talking-head project must create durable artifacts for every stage.
 - [ ] `input/transcript.md` + source media convention.
 - [ ] Transcript normalizer.
 - [ ] Invoke/consume `ai-director-engine` Director IR.
 - [ ] Storyboard compiler.
 - [x] Director IR → Pipeline IR contract/fixture shape established.
-- [ ] DAG runner with state persistence/resume.
-- [ ] Capability router resolves provider registry without host-specific branching.
-- [ ] FFmpeg provider adapter.
-- [ ] Motion Runtime adapter (`motion-runtime-os`).
-- [ ] Artifact/evidence manifest + final QA.
+- [x] DAG runner with dependency validation and state persistence/resume.
+- [x] Capability router with preferred/fallback provider resolution and no host-specific workflow branch.
+- [~] FFmpeg provider adapter: fixture adapter passes orchestration contract; real media adapter still required.
+- [~] Motion Runtime adapter: fixture adapter passes orchestration contract; real cross-repo execution still required.
+- [x] Artifact/evidence manifest kernel with append-only attempts, provider/result evidence and artifact lineage.
+- [ ] Final media QA against real output.
 - [ ] `output/final.mp4` real-media acceptance artifact.
+
+Evidence:
+- GitHub Actions `Video Agent Walking Skeleton` run `32945714649`: SUCCESS.
+- Pipeline IR JSON Schema validation: PASS.
+- DAG/router/resume tests: PASS, including provider fallback and no duplicate attempts after resume.
 
 ## MT-003 — Editable Edit Provider
 - [ ] ChatCut capability discovery / MCP adapter.

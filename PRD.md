@@ -1,66 +1,105 @@
-# AI Video Agent Plugin PRD
+# PRD — Creator OS Video Agent v2
 
-## 产品名称
+## 1. Problem
+AI agents can already read transcripts, write code, call CLIs and interact with editing/rendering tools, but current workflows are fragmented and host-specific. A Codex workflow, Claude workflow, WorkBuddy workflow or Hermes workflow often encodes business logic directly in prompts and tool-specific commands. The result is brittle, non-portable and hard to verify.
 
-AI Video Agent Plugin
+## 2. Product
+Create an **agent-neutral video production runtime**. The system converts transcript/media intent into structured production artifacts and dispatches jobs to interchangeable providers such as ChatCut, FFmpeg, Remotion, HyperFrames, image/video generation, TTS and music systems.
 
-## 产品愿景
+The product is the orchestration protocol and evidence loop — not the LLM host and not the renderer.
 
-成为 Agent 时代的视频生产工具层。
+## 3. Target users
+- creators making talking-head, education, product, documentary and faceless videos;
+- studios operating multiple AI agents;
+- developers building repeatable video automations;
+- Creator OS as the upstream product surface.
 
-任何 Agent 通过插件即可获得自动视频处理能力。
+## 4. Jobs to be done
+Given source video/audio/transcript, the user can say what result they want once. Any compatible host agent can then:
+1. normalize transcript/timestamps;
+2. identify semantic beats and director intent;
+3. produce storyboard and motion/edit blueprint;
+4. generate provider jobs and missing-asset prompts;
+5. execute editing/motion/generation providers;
+6. assemble and render;
+7. verify timing, media streams, semantic intent and visual continuity;
+8. deliver final MP4 plus evidence and editable project artifacts.
 
-## MVP 用户场景
+## 5. Core workflow
+### Stage A — Ingest
+Inputs: `input/transcript.md`, media files, brief, references, brand/style constraints.
+Outputs: normalized transcript, media manifest, project brief.
 
-用户：创作者、内容团队、AI Agent 开发者。
+### Stage B — Understand / Direct
+Use `ai-director-engine` or compatible Semantic Director to produce Director IR. Important beats include revelation, contrast, question, emphasis, pacing and emotional transition.
 
-场景：
+### Stage C — Production Plan
+Compile Director IR into storyboard, shot/motion/edit plan and a provider-neutral Pipeline IR/DAG. This is where transcript segments become explicit jobs rather than prose prompts.
 
-上传长视频 -> AI分析 -> 找高光 -> 自动剪辑 -> 输出短视频。
+### Stage D — Provider execution
+Router chooses providers by capability, editability, determinism, latency, cost and quality:
+- ChatCut: editable transcript/timeline/NLE and motion graphics through MCP/plugin;
+- FFmpeg: deterministic cuts, probes, muxing and media transforms;
+- Remotion: React/programmatic motion;
+- HyperFrames: HTML/CSS/JS/GSAP/Three.js deterministic motion;
+- generation providers: image, video, TTS, music, avatar/digital-human adapters.
 
-## 核心功能
+### Stage E — Assembly
+All jobs write results back to the shared artifact graph. Timeline/composition assembly must consume structured timing rather than human drag/drop state.
 
-### 1. Video Analysis
+### Stage F — Quality gate
+- transcript/timeline sync;
+- artifact existence/checksum;
+- video+audio probe;
+- caption visibility and timing;
+- motion/director semantic survival;
+- visual continuity/keyframe sampling;
+- provider failures and retry evidence.
 
-读取视频信息：
-- 时长
-- 音频
-- 场景
-- 语义内容
+### Stage G — Deliver
+`output/final.mp4`, editable provider project where available, manifests, render results and QA evidence.
 
-### 2. Transcript Engine
+## 6. Host-agent compatibility
+The pipeline may be run by Codex, Claude Code, WorkBuddy, Hermes, Pi or another agent. Host-specific adapters are thin wrappers only. Canonical workflow logic lives in files/schemas/skills, not a proprietary system prompt.
 
-生成带时间戳文本。
+Minimum capability profile:
+- filesystem read/write;
+- command execution or delegated executor;
+- Skill/instruction loading;
+- tool/MCP or HTTP invocation for external providers;
+- iterative observation and retry.
 
-### 3. Highlight Engine
+## 7. Product principles
+- Transcript is input, not source of truth after planning; structured IR is.
+- Director intent and provider execution are separate.
+- Agent host and provider are separate dimensions.
+- Files are durable handoff state; chat context is disposable.
+- Every stage has machine-readable inputs/outputs and acceptance gates.
+- No provider may silently drop unsupported semantics.
+- A successful render is not automatically a good edit.
 
-根据：
-- 情绪
-- 冲突
-- 信息密度
-- 故事完整性
+## 8. MVP
+One talking-head project:
+- transcript + source MP4;
+- Semantic Director / storyboard;
+- Pipeline IR;
+- one editable edit path (ChatCut when available, FFmpeg fallback);
+- motion path through Remotion and HyperFrames;
+- automatic captions;
+- final MP4;
+- evidence package;
+- repeatable execution from at least two host agents.
 
-寻找剪辑片段。
+## 9. Non-goals for MVP
+- rebuild ChatCut/CapCut/Premiere;
+- full Blender/Unreal pipeline;
+- every image/video provider;
+- autonomous publishing;
+- human-equivalent director quality claim.
 
-### 4. Editing Engine
+## 10. Success metrics
+Engineering: deterministic replay, stage-level resume, no hidden host dependency, provider-contract conformance.
+Product: time-to-first-cut, manual interventions per minute of output, QA failure rate, editability rate, human preference vs neutral baseline.
 
-执行：
-- 截取
-- 拼接
-- 字幕
-- 格式转换
-
-### 5. Agent Interface
-
-通过 MCP 暴露能力。
-
-## 暂不开发
-
-- 完整剪辑器 UI
-- 素材商城
-- 社交平台发布系统
-- 复杂特效系统
-
-## 成功指标
-
-一个 Agent 可以通过自然语言完成一次自动剪辑任务。
+## 11. Definition of Done
+MVP is accepted only when the same canonical project can be executed by two distinct host agents, produces equivalent structured jobs, successfully routes at least edit + motion providers, renders a media-probed MP4 and preserves audit evidence. A prompt-only demo is not DONE.

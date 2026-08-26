@@ -42,14 +42,8 @@ jobs:
           curl -L --fail --retry 3 'https://d34w7g4gy10iej.cloudfront.net/video/2603/DOD_111581929/DOD_111581929.mp4' -o creator-os-video-agent/work/real-media/input/source.mp4
           echo 'a93869b5712154b990909a3bfb14e2636a5cce59174ecd64854abdbda302fad0  creator-os-video-agent/work/real-media/input/source.mp4' | sha256sum -c -
       - name: Validate Pipeline IR
-        run: python - <<'PY'
-          import json
-          from jsonschema import Draft202012Validator
-          s=json.load(open('creator-os-video-agent/schemas/pipeline-ir.v1.schema.json'))
-          p=json.load(open('creator-os-video-agent/examples/real-media/pipeline-ir.json'))
-          Draft202012Validator(s).validate(p)
-          print('Pipeline IR schema PASS')
-          PY
+        run: >-
+          python -c "import json; from jsonschema import Draft202012Validator; s=json.load(open('creator-os-video-agent/schemas/pipeline-ir.v1.schema.json')); p=json.load(open('creator-os-video-agent/examples/real-media/pipeline-ir.json')); Draft202012Validator(s).validate(p); print('Pipeline IR schema PASS')"
       - name: Execute orchestrated real-media pipeline
         env:
           PYTHONPATH: ${{ github.workspace }}/creator-os-video-agent

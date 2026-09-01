@@ -2,22 +2,30 @@
 
 ## Objective
 Build a production-grade local-first pipeline any compatible host Agent can execute:
-`transcript/media → semantic direction → storyboard → Pipeline IR/DAG → provider routing → edit/motion/assets/audio → assembly → QA → final MP4`.
+`transcript/media → semantic direction → Beat Graph → Visual Decision → Director Timeline → Pipeline IR/DAG → provider routing → edit/motion/assets/audio → assembly → QA → final MP4`.
 
-## Product decision — 2026-08-26
-The canonical MVP does NOT depend on paid ChatCut execution. ChatCut is **OPTIONAL_PROVIDER / BENCHMARK**. Verified differentiation is now:
-`Director IR → MG Planner → Art Direction → Motion IR → Remotion | HyperFrames → QA → Zhijian takeover → Preference Evidence`.
+## Product decision — 2026-09-02
+MoneyPrinterTurbo is **INFRASTRUCTURE CANDIDATE / RENDERER REFERENCE**, not Director Core.
 
-Motion Canvas remains EXPERIMENTAL / future diagram specialist until unattended headless CI rendering is proven.
+We will absorb useful media-plumbing patterns while keeping semantic direction inside AI Director Engine + Director Timeline.
+
+Canonical differentiation:
+`Director IR → Beat Graph → Visual Decision → Director Timeline → MG/Asset/Audio Routing → Remotion | HyperFrames | FFmpeg | optional adapters → QA → Human Preference Evidence`.
+
+ChatCut remains OPTIONAL_PROVIDER / BENCHMARK. MoneyPrinterTurbo remains OPTIONAL_INFRASTRUCTURE_REFERENCE. Neither may become a semantic single point of truth.
 
 ## MT-001 — Contract & Architecture
-Status: **DONE FOR V1 CONTRACT**
+Status: **DONE FOR V2 CONTRACT**
 - [x] Agent-neutral orchestrator, PRD, Pipeline IR Schema, provider/host registries.
+- [x] Director Timeline v1 schema added.
+- [x] Visual Decision layer made explicit between Director IR and Pipeline IR.
+- [x] Renderer/media infrastructure separated from director semantics.
 
 ## MT-002 — Walking Skeleton
-Status: **DONE FOR REAL-MEDIA VERTICAL SLICE**
+Status: **DONE FOR REAL-MEDIA VERTICAL SLICE; DIRECTOR TIMELINE INTEGRATION NEXT**
 - [x] Real `ai-director-engine` adapter, DAG/resume/router/failover, FFmpeg, artifact/evidence lineage, final MP4.
 - [x] Remotion and HyperFrames real-media acceptance.
+- [ ] Emit `director-timeline.json` from the existing Director/Beat path and compile it into current Pipeline IR without semantic loss.
 
 ## MT-003 — Editable Edit Provider
 Status: **OPTIONAL INTEGRATION — CORE CONTRACT DONE**
@@ -39,39 +47,77 @@ Status: **ENGINEERING CORE DONE; TASTE LEARNING IN PROGRESS**
 - [x] Reproducible concealed A/B package + scorer.
 - [x] Art Direction Engine v1 with `editorial_restraint`, `precision_tech`, `kinetic_signal`.
 - [x] Semantic invariance: style may change palette/type/geometry/rhythm/intensity but not narrative function, attention target or grammar.
-- [x] All three styles render real media through Remotion; `precision_tech` same Motion IR also renders through HyperFrames.
 - [x] Expanded cross-provider grammar: `line_chart`, `timeline`, `node_graph`, `document_highlight`, `browser_frame`, `mask_reveal/hero_text`.
-- [x] Zhijian imports MG + Art Direction provenance and preserves it in human Override Evidence.
 - [~] Human blind preference: infrastructure DONE; real reviewer votes and measurable preference lift pending.
-- [ ] Style Selection Intelligence: choose art direction from content/audience/brand/context automatically.
-- [ ] Preference Learning: convert blind votes and Zhijian overrides into typed/reversible preference signals.
-- [ ] Advanced composition: semantic morph/mask transitions, spatial continuity, richer maps/charts/UI/doc choreography.
-- [~] Rich Zhijian per-effect controls: provenance exists; parameter-level visual editing remains.
-
-### MT-005 Evidence
-- MG Intelligence/Art Direction semantic gate `32975984410`: SUCCESS.
-- Directed MG A/B `32974061233`: SUCCESS; artifact `9608852317`, digest `sha256:57509aad783224d96dda01c81739058577f456f83437d3a10d277d6bc8f35621`.
-- Directed MG HyperFrames `32974210663`: SUCCESS; artifact `9608898870`, digest `sha256:b0ad4ca884a81b1c5b56b0b5796fa2856b7fe029aafe9279cfaec4ccdeedbcd9`.
-- Art Direction real-media `32976364819`: SUCCESS; all 3 Remotion profiles + HyperFrames precision parity; artifact `9609809535`, digest `sha256:ef897ef254682c5f333cadeda98939aea3760ec89a950f356481786601bc624d`.
-- Expanded MG cross-provider `32976405003`: SUCCESS; Remotion + HyperFrames exact same Motion IR, source audio and semantic mapping PASS; artifact `9609855462`, digest `sha256:0b7120ceee9f975ddee782a31e15b674e3a73b7a1f6e04004b9428c4e356bc97`.
-- Zhijian Art Direction provenance `32976886488`: SUCCESS; Python contracts + frontend build PASS.
+- [ ] Style Selection Intelligence.
+- [ ] Preference Learning.
+- [ ] Advanced composition and richer maps/charts/UI/doc choreography.
 
 ## MT-006 — Generation Routers
-After taste/quality acceptance: optional image/video B-roll, TTS/voice, music/avatar providers. Local/no-cost paths preferred where quality permits.
+Status: **INTERFACES RESERVED; QUALITY-GATED**
+- [ ] Stock/media adapter interface using Director Timeline `asset_query` and `purpose`, not raw keyword matching.
+- [ ] Optional Pexels/Pixabay/Coverr-style providers.
+- [ ] Optional image/video generation providers.
+- [ ] Optional HeyGen/D-ID-compatible digital-human providers.
+- [ ] Optional TTS/music/SFX providers.
 
-## MT-007 — Host-Agent Neutrality
+## MT-007 — MoneyPrinterTurbo Absorption
+Status: **DOCUMENTATION + CONTRACT DONE; CODE EXTRACTION NOT STARTED**
+- [x] Competitor Capture added: `docs/benchmarks/MONEYPRINTERTURBO_CAPTURE.md`.
+- [x] Benchmark Registry added: `registries/benchmarks.v1.json`.
+- [x] NOW/LATER/IGNORE decisions recorded.
+- [x] Deployment-vs-director diagnosis matrix added.
+- [x] Architecture/PRD updated so MoneyPrinterTurbo-like modules sit below Director Timeline.
+- [ ] Implement provider-neutral media infrastructure interfaces for stock search, subtitle timing, TTS timing, FFmpeg assembly and batch execution.
+- [ ] Only after interfaces exist, evaluate code-level reuse/license/maintenance economics.
+- [ ] Do not fork MoneyPrinterTurbo as the main product.
+
+## MT-008 — Neutral vs Directed Benchmark
+Status: **NEXT QUALITY CLOSURE**
+Use one identical transcript/source fixture.
+
+Baseline A:
+`keyword/stock assembly → render`.
+
+Directed B:
+`Beat Graph → Visual Decision → Director Timeline → providers → render`.
+
+Measure:
+- semantic alignment per beat;
+- temporal alignment;
+- visual redundancy;
+- attention control;
+- pacing/contrast;
+- manual corrections per minute;
+- blind human preference.
+
+Do not claim Director superiority before preference evidence exists.
+
+## MT-009 — Host-Agent Neutrality
 Status: **PARTIAL**
 File contracts and external handoff semantics exist; two real Host Agents must still execute the same canonical fixture.
 
-## MT-008 — Quality & Human Review
+## MT-010 — Quality & Human Review
 Status: **IN PROGRESS — PRIMARY QUALITY GATE**
-Machine/media/semantic/restraint/style evidence is strong. The unresolved question is now taste: real humans must prefer Directed/Styled output over neutral or provide structured failure tags.
+Machine/media/semantic/restraint/style evidence is strong. The unresolved question is taste: real humans must prefer Directed/Styled output over neutral or provide structured failure tags.
 
-## Zhijian M9
-Core human takeover is accepted: start/observe, final preview, Timeline Store import, MG/Art Direction provenance, approve/reject and provenance-aware override. Next: parameter-level style/effect editing and typed preference feedback ingestion.
+## Immediate executable slice
+1. Existing Director/Beat output emits valid `schemas/director-timeline.v1.schema.json`.
+2. Pipeline compiler consumes Director Timeline and emits current jobs.
+3. Add one local/zero-cost asset lookup adapter or fixture adapter.
+4. Render identical Neutral vs Directed test video.
+5. Produce evidence package with timing + semantic mappings + human review ballot.
 
 ## MVP Definition of Done
-Technical MG/style execution is no longer the blocker. MVP quality closure requires credible human preference evidence and a feedback loop that improves style/grammar selection without silently rewriting canonical assets. ChatCut remains optional.
+Technical render success is not the blocker. MVP quality closure requires:
+- Director Timeline as a real runtime artifact, not documentation only;
+- at least edit + motion + asset/media-infrastructure routing;
+- semantic/temporal QA;
+- credible Neutral vs Directed preference evidence;
+- feedback loop that improves selection without silently rewriting canonical assets.
 
 ## Constraints
-Host Agent ≠ Director ≠ Orchestrator ≠ Provider. Renderers do not decide narrative meaning. Art Direction restyles but cannot rewrite semantics. No template-ID architecture, silent downgrade, paid-provider release dependency, prompt-only state, or decorative animation on every sentence.
+Host Agent ≠ Director ≠ Orchestrator ≠ Provider ≠ Renderer.
+Renderers do not decide narrative meaning.
+Art Direction restyles but cannot rewrite semantics.
+No template-ID architecture, silent downgrade, paid-provider release dependency, prompt-only state, keyword-stock-as-director-core, or decorative animation on every sentence.

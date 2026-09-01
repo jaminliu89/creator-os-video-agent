@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "benchmarks": [
+    {
+      "id": "moneyprinterturbo",
+      "name": "MoneyPrinterTurbo",
+      "url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "category": ["media-infrastructure", "faceless-video-automation", "renderer-reference"],
+      "status": "active",
+      "position": "INFRASTRUCTURE_CANDIDATE",
+      "not_position": "DIRECTOR_CORE",
+      "capture": "docs/benchmarks/MONEYPRINTERTURBO_CAPTURE.md",
+      "now": [
+        "provider abstraction patterns",
+        "TTS/timestamp pipeline patterns",
+        "stock media adapters",
+        "subtitle/transcription timing",
+        "FFmpeg probe/transcode/mux/normalize",
+        "batch/recoverable task execution",
+        "output encoding controls"
+      ],
+      "later": [
+        "optional compatible adapter",
+        "bulk faceless-video execution profile",
+        "stock search heuristics"
+      ],
+      "ignore": [
+        "keyword-to-stock as visual intelligence core",
+        "renderer-owned narrative decisions",
+        "random/simple clip ordering as editorial policy",
+        "one-shot script-to-final without Director Timeline"
+      ]
+    }
+  ]
+}

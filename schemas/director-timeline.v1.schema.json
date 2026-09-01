@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://creator-os.local/schemas/director-timeline.v1.schema.json",
+  "title": "Director Timeline v1",
+  "type": "object",
+  "required": ["version", "project_id", "beats"],
+  "properties": {
+    "version": {"const": "1.0"},
+    "project_id": {"type": "string", "minLength": 1},
+    "source_refs": {"type": "array", "items": {"type": "string"}},
+    "beats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "time_range", "narrative_function", "visual_decision"],
+        "properties": {
+          "beat_id": {"type": "string"},
+          "time_range": {
+            "type": "object",
+            "required": ["start_ms", "end_ms"],
+            "properties": {
+              "start_ms": {"type": "integer", "minimum": 0},
+              "end_ms": {"type": "integer", "minimum": 1}
+            }
+          },
+          "transcript": {"type": "string"},
+          "narrative_function": {
+            "type": "string",
+            "enum": ["hook", "setup", "context", "question", "revelation", "contrast", "proof", "explanation", "transition", "escalation", "payoff", "cta", "pause", "other"]
+          },
+          "emotion": {"type": "string"},
+          "attention_target": {"type": "string"},
+          "pacing": {"type": "string", "enum": ["hold", "slow", "medium", "fast", "burst"]},
+          "visual_decision": {
+            "type": "object",
+            "required": ["mode", "purpose"],
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": ["a_roll", "b_roll", "still_image", "ai_image", "ai_video", "mg_motion", "kinetic_text", "chart", "screen_recording", "digital_human", "ui_demo", "black_frame", "hold_existing", "none"]
+              },
+              "purpose": {"type": "string"},
+              "asset_query": {"type": "string"},
+              "asset_refs": {"type": "array", "items": {"type": "string"}},
+              "shot_intent": {"type": "string"},
+              "motion_intent": {"type": "string"},
+              "text_emphasis": {"type": "array", "items": {"type": "string"}},
+              "provider_constraints": {"type": "array", "items": {"type": "string"}}
+            }
+          },
+          "audio_decision": {
+            "type": "object",
+            "properties": {
+              "music_action": {"type": "string", "enum": ["keep", "raise", "lower", "drop", "switch", "none"]},
+              "sfx": {"type": "array", "items": {"type": "string"}},
+              "silence_ms": {"type": "integer", "minimum": 0}
+            }
+          },
+          "fallback": {
+            "type": "object",
+            "properties": {
+              "allowed_modes": {"type": "array", "items": {"type": "string"}},
+              "reason": {"type": "string"}
+            }
+          },
+          "qa": {
+            "type": "object",
+            "properties": {
+              "semantic_alignment_required": {"type": "boolean"},
+              "timing_tolerance_ms": {"type": "integer", "minimum": 0},
+              "avoid_redundancy": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
